@@ -25,7 +25,7 @@ func logFieldsForMethod(method string, args ...string) (fields logrus.Fields) {
 }
 
 // DatabaseMigration migrates User and Setting tables
-func DatabaseMigration(db *gorm.DB) {
+func databaseMigration(db *gorm.DB) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Setting{})
 }
