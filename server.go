@@ -15,8 +15,10 @@ type (
 	}
 )
 
+var server *Server
+
 // ServerFromConfigFile create a runable server from config file path.
-func ServerFromConfigFile(path string) (Server, error) {
+func ServerFromConfigFile(path string) (*Server, error) {
 	config, err := NewConfigFromJSONFile("config.json")
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -28,8 +30,8 @@ func ServerFromConfigFile(path string) (Server, error) {
 }
 
 // ServerFromConfig create a runable server from config object.
-func ServerFromConfig(conf Config) (server Server, err error) {
-	server = Server{
+func ServerFromConfig(conf Config) (*Server, error) {
+	server = &Server{
 		Log: logrus.New(),
 	}
 	logFields := logFieldsForMethod("EngineFromConfig")
@@ -47,12 +49,14 @@ func ServerFromConfig(conf Config) (server Server, err error) {
 	err = server.loadDatabase(dbConfig)
 	if err != nil {
 		server.Log.WithFields(logFields).Panicf("[2/3: Connect database] Failed, %", err.Error())
-		return Server{}, err
+		return &Server{}, err
 	}
 	server.Log.WithFields(logFields).Info("[2/3: Connect database] Success")
 
-	DatabaseMigration(server.Database)
+	databaseMigration(server.Database)
 	server.Log.WithFields(logFields).Info("[3/3: Core Models migaration] Success")
+
+	initRoutes(server.Engine)
 	return server, nil
 }
 
