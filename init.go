@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/gob"
 
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,4 +14,18 @@ func init() {
 		"module": "core",
 		"action": "init",
 	}).Info("Core module initialized")
+}
+
+func logFieldsForMethod(method string, args ...string) (fields logrus.Fields) {
+	fields = logrus.Fields{
+		"module": "core",
+		"method": method,
+	}
+	return fields
+}
+
+// DatabaseMigration migrates User and Setting tables
+func DatabaseMigration(db *gorm.DB) {
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Setting{})
 }
