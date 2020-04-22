@@ -31,15 +31,15 @@ type (
 
 const (
 	// RankSuperAdmin is the one who own the website
-	RankSuperAdmin = UserRank(89)
+	RankSuperAdmin = 89
 	// RankAdmin who has power
-	RankAdmin = UserRank(55)
+	RankAdmin = 55
 	// RankModerator who work as Robin where Admin is batman
-	RankModerator = UserRank(34)
+	RankModerator = 34
 	// RankWriter : who use their typing skill as good as Ernest Hemingway
-	RankWriter = UserRank(21)
+	RankWriter = 21
 	// RankViewer : who just sit and watch.
-	RankViewer = UserRank(1)
+	RankViewer = 1
 
 	defaultUserKeystring = string("ledinhbao-default-user-key-string")
 )
