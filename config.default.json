@@ -1,0 +1,31 @@
+{
+    "application": {
+        "mode":"debug", 
+        "admin-prefix": "/admin",
+        "db-profile": "sqlite3"
+    },
+    "database": {
+        "sqlite3": {
+            "dialect": "sqlite3",
+            "database": "database.db"
+        },
+        "mysql": {
+            "dialect": "mysql",
+            "username": "ledinhbao_axis",
+            "password": "L93hxwPc8r",
+            "database":"ledinhbao_blog"
+        }
+    },
+    "strava": {
+        "debug": {
+            "webhook-callback": "http://bc7b66a4.ngrok.io",
+            "client-id": "44814",
+            "client-secret": "c44a13c4308b3b834320ae5e3648d6c7855980a3"
+        },
+        "release": {
+            "webhook-callback": "http://blog.ledinhbao.com",
+            "client-id": "44814",
+            "client-secret": "c44a13c4308b3b834320ae5e3648d6c7855980a3"
+        }
+    }
+}
