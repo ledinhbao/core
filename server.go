@@ -12,6 +12,8 @@ type (
 		Engine   *gin.Engine
 		Database *gorm.DB
 		Log      *logrus.Logger
+
+		jwtSigningKey string
 	}
 )
 
@@ -32,7 +34,8 @@ func ServerFromConfigFile(path string) (*Server, error) {
 // ServerFromConfig create a runable server from config object.
 func ServerFromConfig(conf Config) (*Server, error) {
 	server = &Server{
-		Log: logrus.New(),
+		Log:           logrus.New(),
+		jwtSigningKey: "jwt*signing&key+nD5gUktrSQnSyxq#",
 	}
 	logFields := logFieldsForMethod("EngineFromConfig")
 	mode, err := conf.StringValueForKey("application.mode")
@@ -106,4 +109,9 @@ func (server *Server) loadDatabase(conf Config) error {
 		return err
 	}
 	return nil
+}
+
+// SetJWTSigningKey if you want to use a custom signing key
+func (server *Server) SetJWTSigningKey(key string) {
+	server.jwtSigningKey = key
 }

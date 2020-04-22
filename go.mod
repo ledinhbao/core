@@ -11,4 +11,5 @@ require (
 	github.com/sirupsen/logrus v1.5.0
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/crypto v0.0.0-20200420201142-3c4aac89819a
+	gopkg.in/dgrijalva/jwt-go.v3 v3.2.0
 )
