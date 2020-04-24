@@ -7,6 +7,7 @@ import (
 )
 
 type (
+	// UserClaim stores jwt user's credential
 	UserClaim struct {
 		UserID   uint
 		Username string

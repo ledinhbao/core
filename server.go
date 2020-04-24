@@ -12,11 +12,15 @@ import (
 type (
 	// Server stores gin.Engine, Database and Log for side-wide usage
 	Server struct {
-		Engine   *gin.Engine
-		Database *gorm.DB
-		Log      *logrus.Logger
+		Engine *gin.Engine
+		db     *gorm.DB
+		Log    *logrus.Logger
 
 		jwtSigningKey string
+
+		// set this to true if you want to call (*gorm.DB).Debug() on
+		// every request
+		databaseDebug bool
 	}
 )
 
@@ -44,6 +48,7 @@ func ServerFromConfig(conf Config) (*Server, error) {
 	server = &Server{
 		Log:           logrus.New(),
 		jwtSigningKey: "jwt*signing&key+nD5gUktrSQnSyxq#",
+		databaseDebug: false,
 	}
 	logFields := logFieldsForMethod("EngineFromConfig")
 	mode, err := conf.StringValueForKey("application.mode")
@@ -64,11 +69,11 @@ func ServerFromConfig(conf Config) (*Server, error) {
 	}
 	server.Log.WithFields(logFields).Info("[2/3: Connect database] Success")
 
-	databaseMigration(server.Database)
+	databaseMigration(server.db)
 	server.Log.WithFields(logFields).Info("[3/3: Core Models migaration] Success")
 
 	// hook gorm callback for validation
-	validations.RegisterCallbacks(server.Database)
+	validations.RegisterCallbacks(server.db)
 	// init default cookie store
 	server.UseCookieStore(defaultCookieSecret, defaultSessionName)
 	// serve static in ./static with /static path by default
@@ -109,8 +114,13 @@ func (server *Server) UseCookieStore(secret string, name string) {
 	server.Use(sessions.Sessions(name, store))
 }
 
-// ServeStatic serving static resources
-func (server *Server) ServeStatic(path string, filePath string) {
+// ServeStatic serving static resources. A single variadic bool is accepted
+// for file's indexes.
+func (server *Server) ServeStatic(path string, filePath string, indexes ...bool) {
+	if len(indexes) > 0 {
+		server.Use(static.Serve(path, static.LocalFile(filePath, indexes[0])))
+		return
+	}
 	server.Use(static.Serve(path, static.LocalFile(filePath, true)))
 }
 
@@ -130,7 +140,7 @@ func (server *Server) loadDatabase(conf Config) error {
 	if err != nil {
 		return err
 	}
-	server.Database, err = gorm.Open(dialect, conn.ConnectionString())
+	server.db, err = gorm.Open(dialect, conn.ConnectionString())
 	if err != nil {
 		return err
 	}
@@ -140,4 +150,19 @@ func (server *Server) loadDatabase(conf Config) error {
 // SetJWTSigningKey if you want to use a custom signing key
 func (server *Server) SetJWTSigningKey(key string) {
 	server.jwtSigningKey = key
+}
+
+// SetDBDebug set active to true if you want to call (*gorm.DB).Debug()
+// on every query.
+func (server *Server) SetDBDebug(active bool) {
+	server.databaseDebug = active
+}
+
+// DB return (*gorm.DB) object with Debug() method,
+// set by SetDatabaseDebug(bool)
+func (server *Server) DB() *gorm.DB {
+	if server.databaseDebug {
+		return server.db.Debug()
+	}
+	return server.db
 }

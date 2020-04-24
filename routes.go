@@ -44,14 +44,14 @@ func superAdminRegisterFirstTime(c *gin.Context) {
 
 	// check if there is any super user presents yet.
 	var count int
-	server.Database.Where("rank=?", RankSuperAdmin).Find(&User{}).Count(&count)
+	server.DB().Where("rank=?", RankSuperAdmin).Find(&User{}).Count(&count)
 	if count > 0 {
 		displayError(c, http.StatusBadRequest, "Super Admin is already registered for the first time. Login to add more.")
 		return
 	}
 
 	// TODO check for strong password if needed
-	messages = append(messages, server.Database.Create(&user).GetErrors()...)
+	messages = append(messages, server.DB().Create(&user).GetErrors()...)
 	if len(messages) > 0 {
 		displayError(c, http.StatusBadRequest, fmt.Sprintf("%v", messages))
 		return
