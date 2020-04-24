@@ -95,3 +95,14 @@ func UserRankRequired(rank UserRank, unauthorizedCallback func(*gin.Context)) gi
 		}
 	}
 }
+
+// UserFromSession return user object stored in Sessions.Default using defaultKeyString
+func UserFromSession(c *gin.Context) (user User) {
+	var ok bool
+	s := sessions.Default(c)
+	tmp := s.Get(defaultUserKeystring)
+	if user, ok = tmp.(User); !ok {
+		return User{}
+	}
+	return user
+}

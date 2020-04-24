@@ -1,8 +1,11 @@
 package core
 
 import (
+	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/qor/validations"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,6 +18,11 @@ type (
 
 		jwtSigningKey string
 	}
+)
+
+const (
+	defaultCookieSecret = "cookie*secret-nWS37AzEYActW4X"
+	defaultSessionName  = "ldb/core-session"
 )
 
 var server *Server
@@ -59,6 +67,13 @@ func ServerFromConfig(conf Config) (*Server, error) {
 	databaseMigration(server.Database)
 	server.Log.WithFields(logFields).Info("[3/3: Core Models migaration] Success")
 
+	// hook gorm callback for validation
+	validations.RegisterCallbacks(server.Database)
+	// init default cookie store
+	server.UseCookieStore(defaultCookieSecret, defaultSessionName)
+	// serve static in ./static with /static path by default
+	server.Use(static.Serve("/static", static.LocalFile("./static", true)))
+
 	initRoutes(server.Engine)
 	return server, nil
 }
@@ -86,6 +101,17 @@ func (server *Server) GET(relativePath string, handlers ...gin.HandlerFunc) gin.
 // POST is shortcut for (*gin.Engine).POST(string, ...gin.HandlerFunc)
 func (server *Server) POST(relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes {
 	return server.Engine.POST(relativePath, handlers...)
+}
+
+// UseCookieStore if you want to name your own cookie & session
+func (server *Server) UseCookieStore(secret string, name string) {
+	store := sessions.NewCookieStore([]byte(secret))
+	server.Use(sessions.Sessions(name, store))
+}
+
+// ServeStatic serving static resources
+func (server *Server) ServeStatic(path string, filePath string) {
+	server.Use(static.Serve(path, static.LocalFile(filePath, true)))
 }
 
 func (server *Server) loadDatabase(conf Config) error {
